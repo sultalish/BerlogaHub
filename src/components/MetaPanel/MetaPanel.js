@@ -24,8 +24,6 @@ class MetaPanel extends React.Component {
                 <List.Item key={i}>
                     <Image avatar src={val.avatar} />
                     <List.Content>
-                        {console.log(val.username)}
-                        {console.log(val.count)}
                         <List.Header as="a">{val.username}</List.Header>
                         <List.Description>{this.formatCount(val.count)}</List.Description>
                     </List.Content>
