@@ -4,6 +4,9 @@ import MessagesHeader from './MessagesHeader';
 import { Segment, Comment } from 'semantic-ui-react';
 import MessageForm from './MessageForm';
 import Message from './Message';
+import { connect } from 'react-redux';
+import { setUserPosts } from '../../actions';
+import Typing from './Typing';
 
 class Messages extends React.Component {
     state = {
@@ -44,6 +47,7 @@ class Messages extends React.Component {
                 messagesLoading: false
             });
             this.countUniqueUsers(loadedMessages);
+            this.countUserPosts(loadedMessages);
         })
     }
 
@@ -130,6 +134,23 @@ class Messages extends React.Component {
         this.setState({ numUniqueUsers });
     }
 
+    countUserPosts = messages => {
+        let userPosts = messages.reduce((acc, message) => {
+            if (message.user.id in acc) {
+                acc[message.user.id].count += 1;
+            } else {
+                acc[message.user.id] = {
+                    avatar: message.user.avatar,
+                    username: message.user.name,
+                    count: 1
+                }
+            }
+            return acc;
+        }, {});
+        this.props.setUserPosts(userPosts);
+        console.log(userPosts);
+    }
+
     displayMessages = messages => (
         messages.length > 0 && messages.map(message => (
             <Message
@@ -162,6 +183,12 @@ class Messages extends React.Component {
                     <Comment.Group className="messages">
                         {/* Messages */}
                         {searchTerm ? this.displayMessages(searchResults) : this.displayMessages(messages)}
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <span className="user__typing">
+                                alish is typing
+                            </span>
+                            <Typing />
+                        </div>
                     </Comment.Group>
                 </Segment>
 
@@ -177,4 +204,4 @@ class Messages extends React.Component {
     }
 }
 
-export default Messages;
+export default connect(null, { setUserPosts })(Messages);
