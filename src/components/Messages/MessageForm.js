@@ -1,6 +1,8 @@
 import React from 'react';
 import firebase from '../../firebase';
 import { Segment, Button, Input } from 'semantic-ui-react';
+import { Picker, emojiIndex } from 'emoji-mart';
+import 'emoji-mart/css/emoji-mart.css';
 import FileModal from './FileModal';
 import { v4 as uuidv4 } from 'uuid'
 import ProgressBar from './ProgressBar';
@@ -19,7 +21,8 @@ class MessageForm extends React.Component {
         user: this.props.currentUser,
         loading: false,
         errors: [],
-        modal: false
+        modal: false,
+        emojiPicker: false
     };
 
     openModal = () => this.setState({ modal: true });
@@ -44,6 +47,22 @@ class MessageForm extends React.Component {
                 .child(user.uid)
                 .remove()
         }
+    }
+
+    handleTogglePicker = () => {
+        this.setState({ emojiPicker: !this.state.emojiPicker })
+    }
+
+    handleAddEmoji = emoji => {
+        let sym = emoji.unified.split('-')
+        let codesArray = []
+        sym.forEach(el => codesArray.push('0x' + el))
+        let emoji_text = String.fromCodePoint(...codesArray)
+        this.setState({
+            message: this.state.message + ' ' + emoji_text + ' ',
+            emojiPicker: false
+        })
+        setTimeout(() => this.messageInputRef.focus(), 0);
     }
 
     createMessage = (fileURL = null) => {
@@ -166,18 +185,34 @@ class MessageForm extends React.Component {
     };
 
     render() {
-        const { errors, message, loading, modal, uploadState, percentUploaded } = this.state;
+        const { errors, message, loading, modal, uploadState, percentUploaded, emojiPicker } = this.state;
 
         return (
             <Segment className="message__form">
+                {emojiPicker && (
+                    <Picker
+                        set="apple"
+                        onSelect={this.handleAddEmoji}
+                        className="emojipicker"
+                        title="Pick your emoji"
+                        emoji="point_up"
+                    />
+                )}
                 <Input
                     fluid
                     name="message"
                     onChange={this.handleChange}
                     onKeyDown={this.handleKeyDown}
                     value={message}
+                    ref={node => (this.messageInputRef = node)}
                     style={{ marginBottom: '0.7em' }}
-                    label={<Button icon={'add'} />}
+                    label={
+                        <Button
+                            icon={emojiPicker ? 'close' : 'add'}
+                            content={emojiPicker ? 'Close' : null}
+                            onClick={this.handleTogglePicker}
+                        />
+                    }
                     labelPosition="left"
                     className={
                         errors.some(error => error.message.includes('message')) ? 'error' : ""
