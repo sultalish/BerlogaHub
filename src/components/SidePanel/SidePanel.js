@@ -9,7 +9,7 @@ import UserPanel from './UserPanel';
 
 class SidePanel extends React.Component {
     render() {
-        const { currentUser, primaryColor } = this.props
+        const { currentUser, primaryColor, isHidden } = this.props
 
         return (
             <Menu
